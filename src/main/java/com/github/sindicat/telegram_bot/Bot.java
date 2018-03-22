@@ -1,16 +1,16 @@
 package com.github.sindicat.telegram_bot;
 
-import org.telegram.abilitybots.api.bot.AbilityBot;
-import org.telegram.abilitybots.api.objects.Ability;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import static org.telegram.abilitybots.api.objects.Locality.ALL;
-import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
-
-public class Bot extends AbilityBot {
+public class Bot extends TelegramLongPollingBot{
 
     private final static String PATH_TO_PROPERIES = "src/main/resources/config.properties";
     private static String bot_token;
@@ -24,11 +24,8 @@ public class Bot extends AbilityBot {
         bot_username = properties.getProperty("bot_username");
         creatorId = Integer.parseInt(properties.getProperty("creator_id"));
     }
-    public Bot() {
-        super(bot_token, bot_username);
-    }
 
-    public static Properties readConfigProperties() {
+    private static Properties readConfigProperties() {
         FileInputStream fileInputStream;
         Properties properties = new Properties();
 
@@ -39,21 +36,36 @@ public class Bot extends AbilityBot {
         } catch (IOException e) {
             throw new RuntimeException("Incorrect properties file", e);
         }
+ }
+
+    @Override
+    public void onUpdateReceived(Update update) {
+        System.out.println("New message");
+        // We check if the update has a message and the message has text
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            Message msg = update.getMessage();
+            System.out.println(msg.getText());
+            SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
+                    .setChatId(update.getMessage().getChatId())
+                    .setText(update.getMessage().getText());
+            try {
+                execute(message); // Call method to send the message
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
-    public int creatorId() {
-        return creatorId;
+    @Override
+    public String getBotUsername() {
+        return bot_username;
     }
 
-    public Ability sayHelloWorld() {
-        return Ability
-                .builder()
-                .name("hello")
-                .info("says hello world!")
-                .locality(ALL)
-                .privacy(PUBLIC)
-                .action(ctx -> silent.send("Hello world!", ctx.chatId()))
-                .build();
+    @Override
+    public String getBotToken() {
+        return bot_token;
     }
-
 }
+
+
