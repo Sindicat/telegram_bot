@@ -1,8 +1,12 @@
 package storagewords;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.sun.org.apache.xpath.internal.SourceTree;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +14,7 @@ import java.util.List;
 public class DemoCreatorJSON {
 
     private static final String fileName = "D:\\Storage\\data.txt";
+    private static final String outputFileName = "src\\main\\resources\\data\\pairs.json";
 
     public static ArrayList <String> getListWords() { //Return list unhandled strings
         BufferedReader in;
@@ -43,9 +48,33 @@ public class DemoCreatorJSON {
         return listPairs;
     }
 
-    public static void main(String[] args) {
-        for (Pair pair : getListPairs()) {
-            System.out.println(pair);
+    public static void savePairsToJsonFile(ArrayList<Pair> listPairs) {
+        //System.out.println(listPairs);
+        PrintWriter out=null;
+        try {
+            out = new PrintWriter( new BufferedWriter(
+                    new FileWriter(outputFileName)));
+            Gson gson = new Gson();
+            gson.toJson(listPairs,out); //save to JSON file
+        } catch (IOException e) {
+            System.err.println("No such output file or directory");
         }
+        finally {
+            out.close();
+        }
+    }
+
+    public static ArrayList<Pair> readPairsFromJsonFile() {
+        ArrayList<Pair> listPair = new ArrayList<>();
+        try {
+            BufferedReader in = new BufferedReader(
+                    new FileReader(outputFileName));
+            Gson gson = new Gson();
+            listPair = gson.fromJson(in, new TypeToken<ArrayList<Pair>>(){}.getType());
+        } catch (FileNotFoundException e) {
+            System.err.println("File or directory not found ");
+        }
+        return  listPair;
+
     }
 }
