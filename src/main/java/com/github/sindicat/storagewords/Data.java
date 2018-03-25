@@ -1,22 +1,19 @@
-package storagewords;
+package com.github.sindicat.storagewords;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sun.org.apache.xpath.internal.SourceTree;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DemoCreatorJSON {
+public class Data {
 
-    private static final String fileName = "D:\\Storage\\data.txt";
-    private static final String outputFileName = "src\\main\\resources\\data\\pairs.json";
+    private static final String fileName = "src\\main\\resources\\data\\text\\1.txt";
+    private static String outputFileName = "src\\main\\resources\\data\\json\\";
 
-    public static ArrayList <String> getListWords() { //Return list unhandled strings
+    private static ArrayList <String> getListWords() { //Return list unhandled strings
         BufferedReader in;
         ArrayList<String> listWords=null;
         try {
@@ -33,7 +30,7 @@ public class DemoCreatorJSON {
         return listWords;
     }
 
-    public static ArrayList<Pair> getListPairs() {
+    private static ArrayList<Pair> getListPairs() {
         ArrayList<Pair> listPairs = new ArrayList<>();
         ArrayList<String> listWords = getListWords();
         for (int i=0; i < listWords.size(); i++)
@@ -49,7 +46,6 @@ public class DemoCreatorJSON {
     }
 
     public static void savePairsToJsonFile(ArrayList<Pair> listPairs) {
-        //System.out.println(listPairs);
         PrintWriter out=null;
         try {
             out = new PrintWriter( new BufferedWriter(
@@ -64,17 +60,20 @@ public class DemoCreatorJSON {
         }
     }
 
-    public static ArrayList<Pair> readPairsFromJsonFile() {
+    public static ArrayList<Pair> readPairsFromJsonFile(String fileName) {
         ArrayList<Pair> listPair = new ArrayList<>();
         try {
             BufferedReader in = new BufferedReader(
-                    new FileReader(outputFileName));
+                    new FileReader(outputFileName+fileName));
             Gson gson = new Gson();
             listPair = gson.fromJson(in, new TypeToken<ArrayList<Pair>>(){}.getType());
         } catch (FileNotFoundException e) {
             System.err.println("File or directory not found ");
         }
         return  listPair;
+    }
 
+    public static void main(String[] args) {
+        savePairsToJsonFile(getListPairs());
     }
 }

@@ -12,6 +12,7 @@ public class StartBot {
 
         try {
             botsApi.registerBot(new Bot());
+            System.out.println("Bot is working...");
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package com.github.sindicat.telegram_bot;
 
+import com.github.sindicat.storagewords.Controller;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
@@ -16,6 +17,7 @@ public class Bot extends TelegramLongPollingBot{
     private static String bot_token;
     private static String bot_username;
     private static int creatorId;
+    Controller controller = new Controller();
 
 
     static {
@@ -43,11 +45,10 @@ public class Bot extends TelegramLongPollingBot{
         System.out.println("New message");
         // We check if the update has a message and the message has text
         if (update.hasMessage() && update.getMessage().hasText()) {
-            Message msg = update.getMessage();
-            System.out.println(msg.getText());
+            String response = controller.handle(update);
             SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
                     .setChatId(update.getMessage().getChatId())
-                    .setText(update.getMessage().getText());
+                    .setText(response);
             try {
                 execute(message); // Call method to send the message
             } catch (TelegramApiException e) {
