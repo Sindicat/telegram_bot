@@ -5,56 +5,80 @@ import java.util.List;
 
 public class Pair {
 
-    private String word; //Foreign word
-    private List<String> meanings; //Native meanings
+    private String unknownWord; //Foreign word
+    private List<Word> meanings; //Native meanings
     private int numMeanings;
-    private int count;
 
     public int getNumMeanings() {
         return numMeanings;
     }
 
-    public Pair(String word, List<String> meanings) {
-        this.word = word;
-        this.meanings = meanings;
+    public Pair(String unknownWord, List<String> meanings) {
+        this.unknownWord = unknownWord;
         this.numMeanings = meanings.size();
-
+        this.meanings = new ArrayList<>();
+        for (String str : meanings) {
+            this.meanings.add(new Word(str));
+        }
     }
 
-    public String getWord() {
-        return word;
+    public String getUnknownWord() {
+        return unknownWord;
     }
 
-    public void setWord(String word) {
-        this.word = word;
+    public void setUnknownWord(String unknownWord) {
+        this.unknownWord = unknownWord;
+    }
+
+    public List<Word> getMeanings() {
+        return meanings;
     }
 
     @Override
     public String toString() {
         return "Pair{" +
-                "word='" + word + '\'' +
+                "unknownWord='" + unknownWord + '\'' +
                 ", meanings=" + meanings +
                 ", numMeanings=" + numMeanings +
-                ", count=" + count +
                 '}';
     }
 
-    public String getNextMeaning() {
-        if(count < meanings.size()) {
-            String nextMeaning = meanings.get(count);
-            ++count;
-            return nextMeaning;
-        } else {
-            count = 0; //If we is going though this list second time
-            return null;
-        }
-    }
-
-    public String getMeaning(int pos) {
+    public Word getWord(int pos) {
         return meanings.get(pos);
     }
 
-    public void setMeanings(ArrayList<String> meanings) {
+    public void setMeanings(ArrayList<Word> meanings) {
         this.meanings = meanings;
+    }
+}
+
+class Word {
+    @Override
+    public String toString() {
+        return "Word{" +
+                "meaning='" + meaning + '\'' +
+                '}';
+    }
+
+    private String meaning;
+    private boolean isGuessed;
+    Word(String meaning) {
+        this.meaning=meaning;
+    }
+
+    public String getMeaning() {
+        return meaning;
+    }
+
+    public void setMeaning(String meaning) {
+        this.meaning = meaning;
+    }
+
+    public boolean isGuessed() {
+        return isGuessed;
+    }
+
+    public void setGuessed(boolean guessed) {
+        isGuessed = guessed;
     }
 }

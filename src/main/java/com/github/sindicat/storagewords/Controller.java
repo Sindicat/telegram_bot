@@ -13,49 +13,75 @@ public class Controller {
     int currPosInPair;
     Pair currPair;
     boolean isStarted;
+    private final String defaultAnswer = "Illegal command:\n look at enable commands:\n/changefile: file_number\n/idk\n/begin";
 
     public Controller() {
         this.listPairs=Data.readPairsFromJsonFile("1.json");//Default meaning
         this.currPair = listPairs.get(currPosInList);
     }
 
-    public String handle(Update update) {
+    public String handle(Update update) { //Обрабатывает новое пришедешее сообщение
         String messsage = update.getMessage().getText();
         if(messsage.matches("^/changefile:\\s+\\d+\\s+$") && isStarted) { //Check for command: /chanfefile:digits
             this.listPairs = Data.readPairsFromJsonFile(Arrays.asList(messsage.split(":")).get(1).replaceAll(" ","")+".json");
         }
+        if(messsage.matches("^/idk$")) {
+            StringBuilder sb = new StringBuilder(currPair.getUnknownWord()+" means:\n");
+            for (Word word : currPair.getMeanings()) {
+               sb.append("- "+word.getMeaning()+"\n");
+            }
+            return sb.toString();
+
+        }
         if(messsage.matches("^/begin$")) {
             isStarted=true;
-            return "Translate: " +currPair.getWord();
+            return "Translate: " +currPair.getUnknownWord();
         }
         if (isStarted) {
-            if(checkMeaning(messsage)) { //Если значение разгадано true
+            String resultChecking = checkMeaning(messsage);
+            if(resultChecking.equals("true")) { //Если значение разгадано true
                 ++currPosInPair;
                 if(currPosInPair < currPair.getNumMeanings()) { //Отправляем следующее значение слова в паре
-                    return "Good, next meaning for:"+currPair.getWord();//Отгадываем следующее значение
-                } else if(currPosInList < listPairs.size()) { //Если еще не закончился список пар, переходим к слудющей паре
+                    return "Good, next meaning for: "+currPair.getUnknownWord();//Отгадываем следующее значение
+                } else if(currPosInList+1 < listPairs.size()) { //Если еще не закончился список пар, переходим к слудющей паре
                     ++currPosInList;
                     currPosInPair=0;
                     currPair = listPairs.get(currPosInList);
-                    return "Next word: " + currPair.getWord();
+                    return "Next word is: " + currPair.getUnknownWord();
                 } else {
-                    currPosInList=0;
-                    currPosInPair=0;
-                    currPair = listPairs.get(0);
+                    restroreInitialState(); //Заходим на второй круг
                 }
-            } else {
-                return "Incorrect ("+currPair.getWord()+")";
+            } else if (resultChecking.equals("false")) {
+                return "Incorrect meaning \""+currPair.getUnknownWord()+"\". Try again!";
+            } else if (checkMeaning(messsage).equals("guessed")) {
+               return "Already guessed! Write another meaning.";
             }
         }
-        return null;
+        return defaultAnswer;
     }
 
-    boolean checkMeaning(String message) { //Баг в том, что можно несколько раз присылать одно и то же значение
+    String checkMeaning(String message) { //Баг в том, что можно несколько раз присылать одно и то же значение
         for (int i = 0; i < currPair.getNumMeanings(); i++) {
-            if(message.equalsIgnoreCase(currPair.getMeaning(i))) {
-                return true;
+            if(message.equalsIgnoreCase(currPair.getWord(i).getMeaning())) {
+                if(currPair.getWord(i).isGuessed()) {
+                    return "guessed";
+                } else {
+                    currPair.getWord(i).setGuessed(true);
+                    return "true";
+                }
             }
         }
-        return false;
+        return "false";
+    }
+
+    void restroreInitialState() {
+        currPosInList=0;
+        currPosInPair=0;
+        currPair = listPairs.get(0);
+        for (Pair pair : listPairs) {
+            for (int i = 0; i < pair.getNumMeanings() ; i++) {
+                pair.getWord(i).setGuessed(false);
+            }
+        }
     }
 }

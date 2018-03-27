@@ -10,14 +10,15 @@ import java.util.List;
 
 public class Data {
 
-    private static final String fileName = "src\\main\\resources\\data\\text\\1.txt";
+    private static final String inputfileName = "src\\main\\resources\\data\\text\\1.txt";
     private static String outputFileName = "src\\main\\resources\\data\\json\\";
+    private static ArrayList<Pair> readListPairs;
 
     private static ArrayList <String> getListWords() { //Return list unhandled strings
         BufferedReader in;
         ArrayList<String> listWords=null;
         try {
-            in = new BufferedReader( new FileReader(fileName));
+            in = new BufferedReader( new FileReader(inputfileName));
             String str = in.readLine();
             listWords = new ArrayList<>();
             while(str!=null) {
@@ -45,13 +46,14 @@ public class Data {
         return listPairs;
     }
 
-    public static void savePairsToJsonFile(ArrayList<Pair> listPairs) {
+    public static void savePairsToJsonFile(String fileName) {
+        readListPairs = getListPairs();
         PrintWriter out=null;
         try {
             out = new PrintWriter( new BufferedWriter(
-                    new FileWriter(outputFileName)));
+                    new FileWriter(outputFileName+fileName)));
             Gson gson = new Gson();
-            gson.toJson(listPairs,out); //save to JSON file
+            gson.toJson(readListPairs,out); //save to JSON file
         } catch (IOException e) {
             System.err.println("No such output file or directory");
         }
@@ -74,6 +76,6 @@ public class Data {
     }
 
     public static void main(String[] args) {
-        savePairsToJsonFile(getListPairs());
+        savePairsToJsonFile("1.json");
     }
 }
