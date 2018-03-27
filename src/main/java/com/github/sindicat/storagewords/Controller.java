@@ -1,7 +1,9 @@
 package com.github.sindicat.storagewords;
 
+import org.telegram.telegrambots.api.objects.File;
 import org.telegram.telegrambots.api.objects.Update;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -16,14 +18,22 @@ public class Controller {
     private final String defaultAnswer = "Illegal command:\n look at enable commands:\n/changefile: file_number\n/idk\n/begin";
 
     public Controller() {
-        this.listPairs=Data.readPairsFromJsonFile("1.json");//Default meaning
+        try {
+            this.listPairs=Data.readPairsFromJsonFile("1.json");//Default meaning
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         this.currPair = listPairs.get(currPosInList);
     }
 
     public String handle(Update update) { //Обрабатывает новое пришедешее сообщение
         String messsage = update.getMessage().getText();
         if(messsage.matches("^/changefile:\\s+\\d+\\s+$") && isStarted) { //Check for command: /chanfefile:digits
-            this.listPairs = Data.readPairsFromJsonFile(Arrays.asList(messsage.split(":")).get(1).replaceAll(" ","")+".json");
+            try{
+                this.listPairs = Data.readPairsFromJsonFile(Arrays.asList(messsage.split(":")).get(1).replaceAll(" ","")+".json");
+            } catch (FileNotFoundException e) {
+                return "There isn't such file.";
+            }
         }
         if(messsage.matches("^/idk$")) {
             StringBuilder sb = new StringBuilder(currPair.getUnknownWord()+" means:\n");
